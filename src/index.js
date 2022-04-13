@@ -7,5 +7,5 @@ ReactDOM.render(
   <React.StrictMode>
     <GuessPokemonStats />
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById('guess-pokemon-stats')
 );
