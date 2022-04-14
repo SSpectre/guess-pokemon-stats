@@ -20,8 +20,9 @@ export default class StatSliderContainer extends React.Component {
                     answer={this.props.answers[i]}
                     onChange={this.props.onChange}
                     guessed={this.props.guessed}
-                    average={this.props.average}
+                    average={this.props.average[i]}
                     disabled={this.props.disabled}
+                    pokemon={this.props.pokemon}
                 />)}
             </div>
         );

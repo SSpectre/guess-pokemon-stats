@@ -11,6 +11,7 @@ export default class GuessPokemonStats extends React.Component {
 			currentPokemon: null,
 			realTotal: 0,
 			average: 0,
+			adjustedAverage: Array(6).fill(0),
 			currentStats: Array(6).fill(1),
 			currentTotal: 6,
 			guessed: false,
@@ -121,19 +122,39 @@ export default class GuessPokemonStats extends React.Component {
 			guessed: false,
 		})
 		
-		let value = 0;
+		let total = 0;
 		for (const stat of this.state.currentPokemon.stats) {
-			value += stat.base_stat;
+			total += stat.base_stat;
+		}
+
+		let average = total / 6;
+
+		//adjust stats to match total when average is a decimal number
+		let adjustedAverage = Array(6).fill(Math.round(average));
+		let adjustedTotal = adjustedAverage[0] * 6;
+
+		let i = 0;
+		while (adjustedTotal < total) {
+			adjustedAverage[i]++;
+			adjustedTotal++;
+			i++;
+		}
+
+		i = adjustedAverage.length - 1;
+		while (adjustedTotal > total) {
+			adjustedAverage[i]--;
+			adjustedTotal--;
+			i--;
 		}
 
 		this.setState({
-			realTotal: value,
-			average: value / 6,
+			realTotal: total,
+			average: average,
+			adjustedAverage: adjustedAverage,
 		})
 
 		//automatically set sliders to average when new pokemon is selected
-		let stats = Array(6).fill(Math.round(this.state.average));
-		this.updateCurrentTotal(stats);
+		this.updateCurrentTotal(adjustedAverage);
 	}
 
 	updateCurrentTotal(stats) {
@@ -214,8 +235,9 @@ export default class GuessPokemonStats extends React.Component {
 						answers={answers}
 						onChange={this.updateStat}
 						guessed={this.state.guessed}
-						average={Math.round(this.state.average)}
+						average={this.state.adjustedAverage}
 						disabled={!loaded}
+						pokemon={loaded ? this.state.currentPokemon.name : null}
 					/>
 				</div>
 				<div>
@@ -245,7 +267,7 @@ export default class GuessPokemonStats extends React.Component {
 				</div>
 				<div>
 					<p className={this.state.realTotal === this.state.currentTotal ? 'invisible' : 'visible'}>
-						(Current total must match the Pok&eacute;mon's total)
+						(Current total must match the Pok&eacute;mon's total before guessing)
 					</p>
 					<p className={this.state.guessed ? 'visible' : 'invisible'}>
 						You guessed <b>{this.state.correctness.toFixed(1)}%</b> correct!

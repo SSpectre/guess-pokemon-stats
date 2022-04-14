@@ -9,12 +9,13 @@ export default class StatSlider extends React.Component {
         }
 
         this.updateValue = this.updateValue.bind(this);
+        this.correctValue = this.correctValue.bind(this);
 
         this.sliderRef = React.createRef();
     }
 
     componentDidUpdate(prevProps) {
-        if (prevProps.average !== this.props.average) {
+        if (prevProps.pokemon !== this.props.pokemon || prevProps.average !== this.props.average) {
             this.setState({
                 value: this.props.average,
             })
@@ -27,6 +28,16 @@ export default class StatSlider extends React.Component {
         })
 
         this.props.onChange(this.props.index, event.target.value);
+    }
+
+    //prevents invalid numbers from being typed in
+    correctValue(event) {
+        let value = Math.round(Number(event.target.value));
+        event.target.value = value;
+
+        if (value > 255) {
+            event.target.value = 255;
+        }
     }
 
     render() {
@@ -67,6 +78,7 @@ export default class StatSlider extends React.Component {
                     value={this.state.value}
                     disabled={this.props.guessed || this.props.disabled}
                     onChange={this.updateValue}
+                    onInput={this.correctValue}
                 />
                 <label className={this.props.guessed ? 'answer-label' : 'answer-label-hidden'}>
                     {this.props.answer}
