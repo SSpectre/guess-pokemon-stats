@@ -1,11 +1,9 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
+  line-height: normal;
 }
 
 code {
@@ -13,27 +11,42 @@ code {
     monospace;
 }
 
-img {
+img.pokemon-img {
   display: block;
   margin: auto;
-  height: 400px;
+  height: 300px;
+  width: 300px;
+  object-fit:contain;
 }
 
-button {
-  margin: 10px;
-}
-
-table {
+table.totals {
   margin: auto;
   border-spacing: 20px 0;
+  border: none;
+  width: auto;
 }
 
-td {
+tr.totals {
+  background: none;
+}
+
+td.total-label, td.total {
   width: 120px;
+  padding: 0;
+  text-align: center;
 }
 
-p {
+td.total {
+  font-size: 48px;
+}
+
+td.total-label {
+  font-size: 16px;
+}
+
+p.visible, p.invisible {
   margin: 0;
+  font-size: 16px;
 }
 
 p.visible {
@@ -44,12 +57,7 @@ p.invisible {
   display: none;
 }
 
-td.total {
-  font-size: 48px;
-}
-
 .stat-container {
-  width: 50%;
   margin: auto;
 }
 
@@ -80,6 +88,7 @@ td.total {
   transition: opacity .2s;
   margin: 0;
   z-index: 0;
+  border: none;
 }
 
 .slider::-webkit-slider-runnable-track {
@@ -128,10 +137,12 @@ input[type="range"]::-ms-fill-lower {
   width: 115px;
   text-align: right;
   flex-shrink: 0;
+  margin: 0;
+  font-size: 16px;
 }
 
 .slider-number {
-  width: 38px;
+  width: 50px;
 }
 
 .answer-container, .answer-container-hidden {
@@ -139,7 +150,7 @@ input[type="range"]::-ms-fill-lower {
   position: relative;
   width: 100%;
   height: 25px;
-  top: -29px;
+  top: -25px;
   z-index: 1;
 }
 
@@ -167,7 +178,11 @@ input[type="range"]::-ms-fill-lower {
   visibility: hidden;
 }
 
-.guess-button {
+button.guess, button.random {
   margin: 10px;
+  font-size: 15px;
+}
+
+button.guess {
   width: 100px;
 }

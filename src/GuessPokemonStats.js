@@ -180,7 +180,7 @@ export default class GuessPokemonStats extends React.Component {
 				<div>
 					<div>
 						<img
-							id="pokemon-img"
+							className="pokemon-img"
 							src={'https://img.pokemondb.net/artwork/' + this.state.currentPokemon.name + '.jpg'}
 							alt={this.state.currentPokemon.name}
 						/>
@@ -192,7 +192,7 @@ export default class GuessPokemonStats extends React.Component {
 							value={this.state.currentPokemon.name}
 						/>
 						<button
-							className="random-button"
+							className="random"
 							onClick={this.selectRandomPokemon}
 						>
 							Random
@@ -219,24 +219,24 @@ export default class GuessPokemonStats extends React.Component {
 					/>
 				</div>
 				<div>
-					<table>
+					<table className="totals">
 						<tbody>
-							<tr>
+							<tr className="totals">
 								<td className="total">{this.state.realTotal}</td>
 								<td className="total">{Number(this.state.average.toFixed(1))}</td>
 								<td className="total">{this.state.currentTotal}</td>
 							</tr>
-							<tr>
-								<td>Total</td>
-								<td>Average</td>
-								<td>Current</td>
+							<tr className="totals">
+								<td className="total-label">Total</td>
+								<td className="total-label">Average</td>
+								<td className="total-label">Current</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
 				<div>
 					<button
-						className="guess-button"
+						className="guess"
 						disabled={this.state.realTotal !== this.state.currentTotal || this.state.guessed}
 						onClick={this.guess}
 					>
