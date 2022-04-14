@@ -27,13 +27,14 @@ table.totals {
 }
 
 tr.totals {
-  background: none;
+  background: none !important;
 }
 
 td.total-label, td.total {
   width: 120px;
   padding: 0;
   text-align: center;
+  border: none;
 }
 
 td.total {
@@ -89,6 +90,7 @@ p.invisible {
   margin: 0;
   z-index: 0;
   border: none;
+  padding: 0;
 }
 
 .slider::-webkit-slider-runnable-track {
