@@ -145,6 +145,7 @@ input[type="range"]::-ms-fill-lower {
 
 .slider-number {
   width: 50px;
+  padding: 0;
 }
 
 .answer-container, .answer-container-hidden {
