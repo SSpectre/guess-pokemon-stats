@@ -1,4 +1,5 @@
 import React from 'react';
+import { isMobile } from 'react-device-detect';
 import PokemonSelect from './PokemonSelect'
 import StatSliderContainer from './StatSliderContainer'
 
@@ -201,7 +202,7 @@ export default class GuessPokemonStats extends React.Component {
 				<div>
 					<div>
 						<img
-							className="pokemon-img"
+							className={isMobile ? 'pokemon-img-mobile' : 'pokemon-img'}
 							src={'https://img.pokemondb.net/artwork/' + this.state.currentPokemon.name + '.jpg'}
 							alt={this.state.currentPokemon.name}
 						/>
@@ -244,9 +245,9 @@ export default class GuessPokemonStats extends React.Component {
 					<table className="totals">
 						<tbody>
 							<tr className="totals">
-								<td className="total">{this.state.realTotal}</td>
-								<td className="total">{Number(this.state.average.toFixed(1))}</td>
-								<td className="total">{this.state.currentTotal}</td>
+								<td className={isMobile ? 'total-mobile' : 'total'}>{this.state.realTotal}</td>
+								<td className={isMobile ? 'total-mobile' : 'total'}>{Number(this.state.average.toFixed(1))}</td>
+								<td className={isMobile ? 'total-mobile' : 'total'}>{this.state.currentTotal}</td>
 							</tr>
 							<tr className="totals">
 								<td className="total-label">Total</td>
@@ -269,7 +270,7 @@ export default class GuessPokemonStats extends React.Component {
 					<p className={this.state.realTotal === this.state.currentTotal ? 'invisible' : 'visible'}>
 						(Current total must match the Pok&eacute;mon's total before guessing)
 					</p>
-					<p className={this.state.guessed ? 'visible' : 'invisible'}>
+					<p className={"correctness " + (this.state.guessed ? 'visible' : 'invisible')}>
 						You guessed <b>{this.state.correctness.toFixed(1)}%</b> correct!
 					</p>
 					<p className={loaded && this.state.currentPokemon.name.match(/gigantamax/g) ? 'visible' : 'invisible'}>

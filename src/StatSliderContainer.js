@@ -1,12 +1,19 @@
 import React from 'react'
 import StatSlider from './StatSlider'
+import {isMobile} from 'react-device-detect';
 
 export default class StatSliderContainer extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            stats: ['HP', 'Attack', 'Defense', 'Special Attack', 'Special Defense', 'Speed'],
+        if (isMobile) {
+            this.state = {
+                stats: ['HP', "Atk", "Def", "SpA", "SpD", "Spe"],
+            }
+        } else {
+            this.state = {
+                stats: ['HP', 'Attack', 'Defense', 'Special Attack', 'Special Defense', 'Speed'],
+            }
         }
     }
 
