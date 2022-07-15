@@ -77,6 +77,7 @@ export default class GuessPokemonStats extends React.Component {
 				tempName = tempName.replace(/gmax/g, 'gigantamax');
 				tempName = tempName.replace(/alola/g, 'alolan');
 				tempName = tempName.replace(/galar/g, 'galarian');
+				tempName = tempName.replace(/hisui/g, 'hisuian');
 				tempName = tempName.replace(/starter/g, 'lets-go');
 				tempName = tempName.replace(/-average$/g, '');
 				tempName = tempName.replace(/-red$/g, '-core');
