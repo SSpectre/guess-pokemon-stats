@@ -9,6 +9,9 @@ export default class GuessPokemonStats extends React.Component {
 		super(props);
 
 		this.state = {
+			//pulls images from Pokemon Database if true and PokeAPI if false
+			//Database is preferred since it uses jpg instead of png, but API has more complete and up-to-date art, so it will more likely be used
+			useDBForImages: false,
 			pokemonList: [],
 			currentPokemon: null,
 			realTotal: 0,
@@ -46,65 +49,7 @@ export default class GuessPokemonStats extends React.Component {
 				tempPokemon[i].species.id = speciesId[i];
 			}
 
-			//filter out forms that have no pokemondb artwork
-			let filteredPokemon = tempPokemon.filter((value, index, arr) => {
-				let tempName = value.name;
-				let result = true;
-
-				result = !tempName.match(/-totem/g);
-				result = result && !tempName.match(/-cap$/g);
-				result = result && !tempName.match(/-cosplay$/g);
-				result = result && !tempName.match(/castform-/g);
-				result = result && !tempName.match(/-battle-bond$/g);
-				result = result && !tempName.match(/-eternal$/g);
-				result = result && !tempName.match(/(pumpkaboo|gourgeist)-(?!average)/g);
-				result = result && !tempName.match(/minior-(?!red)/g);
-				result = result && !tempName.match(/-power-construct$/g);
-				result = result && !tempName.match(/-own-tempo$/g);
-				result = result && !tempName.match(/-busted$/g);
-				result = result && !tempName.match(/-original$/g);
-				result = result && !tempName.match(/cramorant-/g);
-				result = result && !tempName.match(/-low-key-gmax$/g);
-				result = result && !tempName.match(/-eternamax$/g);
-				result = result && !tempName.match(/-dada$/g);
-				result = result && !tempName.match(/-bloodmoon$/g);
-				result = result && !tempName.match(/-family-of-three$/g);
-				result = result && !tempName.match(/squawkabilly-/g);
-				result = result && !tempName.match(/-three-segment$/g);
-				result = result && !tempName.match(/koraidon-/g);
-				result = result && !tempName.match(/miraidon-/g);
-				result = result && !tempName.match(/ogerpon-/g);
-
-				return result;
-			})
-
-			//change form names to how pokemondb formats them
-			for (let i = 0; i < filteredPokemon.length; i++) {
-				let tempName = filteredPokemon[i].name;
-
-				tempName = tempName.replace(/gmax/g, 'gigantamax');
-				tempName = tempName.replace(/alola/g, 'alolan');
-				tempName = tempName.replace(/galar/g, 'galarian');
-				tempName = tempName.replace(/hisui/g, 'hisuian');
-				tempName = tempName.replace(/paldea/g, 'paldean');
-				tempName = tempName.replace(/starter/g, 'lets-go');
-				tempName = tempName.replace(/-average$/g, '');
-				tempName = tempName.replace(/-red$/g, '-core');
-				tempName = tempName.replace(/-red-meteor$/g, '-meteor');
-				tempName = tempName.replace(/-disguised$/g, '');
-				tempName = tempName.replace(/necrozma-dusk/g, 'necrozma-dusk-mane');
-				tempName = tempName.replace(/necrozma-dawn/g, 'necrozma-dawn-wings');
-				tempName = tempName.replace(/amped-/g, '');
-				tempName = tempName.replace(/zacian$/g, 'zacian-hero');
-				tempName = tempName.replace(/zamazenta$/g, 'zamazenta-hero');
-				tempName = tempName.replace(/calyrex-ice$/g, 'calyrex-ice-rider');
-				tempName = tempName.replace(/calyrex-shadow$/g, 'calyrex-shadow-rider');
-				tempName = tempName.replace(/-combat-breed$/g, '');
-				tempName = tempName.replace(/paldean-blaze-breed$/g, 'blaze');
-				tempName = tempName.replace(/paldean-aqua-breed$/g, 'aqua');
-
-				filteredPokemon[i].name = tempName;
-			}
+			let filteredPokemon = this.filterAndFormat(tempPokemon);
 
 			//place alternate forms after base forms
 			filteredPokemon.sort((a, b) => a.species.id - b.species.id);
@@ -128,13 +73,112 @@ export default class GuessPokemonStats extends React.Component {
 			(error) => {
 				//the API page for Slugma specifically returns an empty response only when accessed through the website
 				//I can't determine the cause, so Slugma's data is hardcoded for now
-				if (url.slice(-13) == "/pokemon/218/") {
+				if (url.slice(-13) === "/pokemon/218/") {
 					return slugma;
 				}
 			}
 		);
 
 		return response;
+	}
+
+	filterAndFormat(originalList, useDB) {
+		let filteredPokemon;
+
+		if (this.state.useDBForImages) {
+			//filter out forms that have no pokemondb artwork or only minor differences
+			filteredPokemon = originalList.filter((value, index, arr) => {
+				let tempName = value.name;
+				let result = true;
+
+				result = !tempName.match(/-totem/g);
+				result = result && !tempName.match(/-cap$/g);
+				result = result && !tempName.match(/-cosplay$/g);
+				result = result && !tempName.match(/castform-/g);
+				result = result && !tempName.match(/-battle-bond$/g);
+				result = result && !tempName.match(/-eternal$/g);
+				result = result && !tempName.match(/minior-(?!red)/g);
+				result = result && !tempName.match(/-power-construct$/g);
+				result = result && !tempName.match(/-own-tempo$/g);
+				result = result && !tempName.match(/-busted$/g);
+				result = result && !tempName.match(/-original$/g);
+				result = result && !tempName.match(/cramorant-/g);
+				result = result && !tempName.match(/-low-key-gmax$/g);
+				result = result && !tempName.match(/-eternamax$/g);
+				result = result && !tempName.match(/-dada$/g);
+				result = result && !tempName.match(/-bloodmoon$/g);
+				result = result && !tempName.match(/-family-of-three$/g);
+				result = result && !tempName.match(/squawkabilly-/g);
+				result = result && !tempName.match(/-three-segment$/g);
+				result = result && !tempName.match(/koraidon-/g);
+				result = result && !tempName.match(/miraidon-/g);
+				result = result && !tempName.match(/ogerpon-/g);
+
+				return result;
+			})
+
+			//change form names to how pokemondb formats them
+			for (const pokemon of filteredPokemon) {
+				pokemon.name = pokemon.name.replace(/gmax/g, 'gigantamax');
+				pokemon.name = pokemon.name.replace(/alola/g, 'alolan');
+				pokemon.name = pokemon.name.replace(/galar/g, 'galarian');
+				pokemon.name = pokemon.name.replace(/hisui/g, 'hisuian');
+				pokemon.name = pokemon.name.replace(/paldea/g, 'paldean');
+				pokemon.name = pokemon.name.replace(/starter/g, 'lets-go');
+				pokemon.name = pokemon.name.replace(/-red$/g, '-core');
+				pokemon.name = pokemon.name.replace(/-red-meteor$/g, '-meteor');
+				pokemon.name = pokemon.name.replace(/-disguised$/g, '');
+				pokemon.name = pokemon.name.replace(/necrozma-dusk/g, 'necrozma-dusk-mane');
+				pokemon.name = pokemon.name.replace(/necrozma-dawn/g, 'necrozma-dawn-wings');
+				pokemon.name = pokemon.name.replace(/amped-/g, '');
+				pokemon.name = pokemon.name.replace(/zacian$/g, 'zacian-hero');
+				pokemon.name = pokemon.name.replace(/zamazenta$/g, 'zamazenta-hero');
+				pokemon.name = pokemon.name.replace(/calyrex-ice$/g, 'calyrex-ice-rider');
+				pokemon.name = pokemon.name.replace(/calyrex-shadow$/g, 'calyrex-shadow-rider');
+				pokemon.name = pokemon.name.replace(/-combat-breed$/g, '');
+				pokemon.name = pokemon.name.replace(/paldean-blaze-breed$/g, 'blaze');
+				pokemon.name = pokemon.name.replace(/paldean-aqua-breed$/g, 'aqua');
+			}
+		} else {
+			//filter out forms that have no artwork or only minor differences
+			filteredPokemon = originalList.filter((value, index, arr) => {
+				let tempName = value.name;
+				let result = true;
+
+				result = !tempName.match(/-totem/g);
+				result = result && !tempName.match(/-cap$/g);
+				result = result && !tempName.match(/-cosplay$/g);
+				result = result && !tempName.match(/-battle-bond$/g);
+				result = result && !tempName.match(/minior-(?!red)/g);
+				result = result && !tempName.match(/-power-construct$/g);
+				result = result && !tempName.match(/-own-tempo$/g);
+				result = result && !tempName.match(/-busted$/g);
+				result = result && !tempName.match(/-original$/g);
+				result = result && !tempName.match(/cramorant-/g);
+				result = result && !tempName.match(/-low-key-gmax$/g);
+				result = result && !tempName.match(/-dada$/g);
+				result = result && !tempName.match(/koraidon-/g);
+				result = result && !tempName.match(/miraidon-/g);
+
+				return result;
+			})
+
+			//change form names to improve formatting
+			for (const pokemon of filteredPokemon) {
+				pokemon.name = pokemon.name.replace(/gmax/g, 'gigantamax');
+				pokemon.name = pokemon.name.replace(/-red$/g, '-core');
+				pokemon.name = pokemon.name.replace(/-red-meteor$/g, '-meteor');
+				pokemon.name = pokemon.name.replace(/-disguised$/g, '');
+				pokemon.name = pokemon.name.replace(/necrozma-dusk/g, 'necrozma-dusk-mane');
+				pokemon.name = pokemon.name.replace(/necrozma-dawn/g, 'necrozma-dawn-wings');
+				pokemon.name = pokemon.name.replace(/amped-/g, '');
+				pokemon.name = pokemon.name.replace(/calyrex-ice$/g, 'calyrex-ice-rider');
+				pokemon.name = pokemon.name.replace(/calyrex-shadow$/g, 'calyrex-shadow-rider');
+				pokemon.name = pokemon.name.replace(/oinkologne$/g, 'oinkologne-male');
+			}
+		}
+
+		return filteredPokemon;
 	}
 
 	selectPokemonFromDropdown(event) {
@@ -227,12 +271,20 @@ export default class GuessPokemonStats extends React.Component {
 
 		let selection;
 		if (loaded) {
+			let imageUrl;
+			if (this.state.useDBForImages) {
+				imageUrl = 'https://img.pokemondb.net/artwork/' + this.state.currentPokemon.name + '.jpg'
+			} else {
+				let imageBase = this.state.currentPokemon.sprites.other
+				imageUrl = imageBase['official-artwork']['front_default'];
+			}
+
 		 	selection = (
 				<div>
 					<div>
 						<img
 							className={isMobile ? 'pokemon-img-mobile' : 'pokemon-img'}
-							src={'https://img.pokemondb.net/artwork/' + this.state.currentPokemon.name + '.jpg'}
+							src={imageUrl}
 							alt={this.state.currentPokemon.name}
 						/>
 					</div>
