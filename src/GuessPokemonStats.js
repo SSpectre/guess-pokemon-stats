@@ -2,6 +2,7 @@ import React from 'react';
 import { isMobile } from 'react-device-detect';
 import PokemonSelect from './PokemonSelect'
 import StatSliderContainer from './StatSliderContainer'
+import slugma from './slugma.json'
 
 export default class GuessPokemonStats extends React.Component {
 	constructor(props) {
@@ -66,6 +67,13 @@ export default class GuessPokemonStats extends React.Component {
 				result = result && !tempName.match(/-low-key-gmax$/g);
 				result = result && !tempName.match(/-eternamax$/g);
 				result = result && !tempName.match(/-dada$/g);
+				result = result && !tempName.match(/-bloodmoon$/g);
+				result = result && !tempName.match(/-family-of-three$/g);
+				result = result && !tempName.match(/squawkabilly-/g);
+				result = result && !tempName.match(/-three-segment$/g);
+				result = result && !tempName.match(/koraidon-/g);
+				result = result && !tempName.match(/miraidon-/g);
+				result = result && !tempName.match(/ogerpon-/g);
 
 				return result;
 			})
@@ -78,6 +86,7 @@ export default class GuessPokemonStats extends React.Component {
 				tempName = tempName.replace(/alola/g, 'alolan');
 				tempName = tempName.replace(/galar/g, 'galarian');
 				tempName = tempName.replace(/hisui/g, 'hisuian');
+				tempName = tempName.replace(/paldea/g, 'paldean');
 				tempName = tempName.replace(/starter/g, 'lets-go');
 				tempName = tempName.replace(/-average$/g, '');
 				tempName = tempName.replace(/-red$/g, '-core');
@@ -90,6 +99,9 @@ export default class GuessPokemonStats extends React.Component {
 				tempName = tempName.replace(/zamazenta$/g, 'zamazenta-hero');
 				tempName = tempName.replace(/calyrex-ice$/g, 'calyrex-ice-rider');
 				tempName = tempName.replace(/calyrex-shadow$/g, 'calyrex-shadow-rider');
+				tempName = tempName.replace(/-combat-breed$/g, '');
+				tempName = tempName.replace(/paldean-blaze-breed$/g, 'blaze');
+				tempName = tempName.replace(/paldean-aqua-breed$/g, 'aqua');
 
 				filteredPokemon[i].name = tempName;
 			}
@@ -105,8 +117,24 @@ export default class GuessPokemonStats extends React.Component {
 	}
 
 	async fetchJson(url) {
-		const response = await fetch(url);
-		return response.json();
+		let response = await fetch(url)
+		.then(
+			(result) => {
+				const json = result.json();
+				return json;
+			}
+		)
+		.catch(
+			(error) => {
+				//the API page for Slugma specifically returns an empty response only when accessed through the website
+				//I can't determine the cause, so Slugma's data is hardcoded for now
+				if (url.slice(-13) == "/pokemon/218/") {
+					return slugma;
+				}
+			}
+		);
+
+		return response;
 	}
 
 	selectPokemonFromDropdown(event) {
