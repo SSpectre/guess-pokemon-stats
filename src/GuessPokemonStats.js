@@ -192,7 +192,7 @@ export default class GuessPokemonStats extends React.Component {
 
 	async selectPokemon(index) {
 		this.setState({
-			currentPokemon: await this.state.pokemonList[index],
+			currentPokemon: this.state.pokemonList[index],
 			guessed: false,
 		})
 		

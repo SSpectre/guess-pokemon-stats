@@ -31,12 +31,23 @@ export default class PokemonSelect extends React.Component {
                     fixedName = fixedName.replace(/Mr-/g, 'Mr. ');
                     fixedName = fixedName.replace(/-Jr/g, ' Jr.');
                     fixedName = fixedName.replace(/Flabebe/g, 'Flab\xE9b\xE9');
-                    fixedName = fixedName.replace(/Type-Null/g, 'Type: Null');
+                    fixedName = fixedName.replace(/Type-/g, 'Type: ');
                     fixedName = fixedName.replace(/mo-O/g, 'mo-o');
                     fixedName = fixedName.replace(/Tapu-/g, 'Tapu ');
                     fixedName = fixedName.replace(/-10/g, '-10%');
                     fixedName = fixedName.replace(/-50/g, '-50%');
                     fixedName = fixedName.replace(/-Pau/g, '-Pa\'u');
+                    fixedName = fixedName.replace(/Great-/g, 'Great ');
+                    fixedName = fixedName.replace(/Scream-/g, 'Scream ');
+                    fixedName = fixedName.replace(/Brute-/g, 'Brute ');
+                    fixedName = fixedName.replace(/Flutter-/g, 'Flutter ');
+                    fixedName = fixedName.replace(/Slither-/g, 'Slither ');
+                    fixedName = fixedName.replace(/Sandy-/g, 'Sandy ');
+                    fixedName = fixedName.replace(/Roaring-/g, 'Roaring ');
+                    fixedName = fixedName.replace(/Walking-/g, 'Walking ');
+                    fixedName = fixedName.replace(/Gouging-/g, 'Gouging ');
+                    fixedName = fixedName.replace(/Raging-/g, 'Raging ');
+                    fixedName = fixedName.replace(/Iron-/g, 'Iron ');
 
                     return (
                         <option 
