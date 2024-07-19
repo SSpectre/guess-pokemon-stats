@@ -12,6 +12,8 @@ export default class GuessPokemonStats extends React.Component {
 			//pulls images from Pokemon Database if true and PokeAPI if false
 			//Database is preferred since it uses jpg instead of png, but API has more complete and up-to-date art, so it will more likely be used
 			useDBForImages: false,
+			totalLoadingSteps: 1,
+			currentLoadingSteps: 0,
 			pokemonList: [],
 			currentPokemon: null,
 			realTotal: 0,
@@ -20,7 +22,7 @@ export default class GuessPokemonStats extends React.Component {
 			currentStats: Array(6).fill(1),
 			currentTotal: 6,
 			guessed: false,
-			correctness: 0,
+			correctness: 0
 		};
 
 		this.selectPokemonFromDropdown = this.selectPokemonFromDropdown.bind(this);
@@ -32,16 +34,21 @@ export default class GuessPokemonStats extends React.Component {
 	componentDidMount() {
 		(async () => {
 			//fetch urls to pokemon objects from apis
-			const json = await this.fetchJson('https://pokeapi.co/api/v2/pokemon?limit=2000');
+			const json = await this.fetchJson('https://pokeapi.co/api/v2/pokemon?limit=2000', false);
+			this.setState({
+				//there are two steps involved for each pokemon which will contribute to the loading percentage
+				totalLoadingSteps: json.count * 2
+			});
 			const pokemonUrls = await json.results;
-			const pokemonList = await Promise.all(pokemonUrls.map(pokemon => this.fetchJson(pokemon.url)));
+
+			const pokemonList = await Promise.all(pokemonUrls.map(pokemon => this.fetchJson(pokemon.url, true)));
 			this.setState({
 				pokemonList: pokemonList,
 			});
 
 			//api's pokemon object doesn't include national dex number
 			//fetch from pokemon-species and associate it with pokemon
-			const species = await Promise.all(this.state.pokemonList.map(pokemon => this.fetchJson(pokemon.species.url)));
+			const species = await Promise.all(this.state.pokemonList.map(pokemon => this.fetchJson(pokemon.species.url, true)));
 			const speciesId = species.map(pokemon => pokemon.id);
 			let tempPokemon = this.state.pokemonList.slice();
 
@@ -61,10 +68,16 @@ export default class GuessPokemonStats extends React.Component {
 		})();
 	}
 
-	async fetchJson(url) {
-		let response = await fetch(url)
+	fetchJson(url, loadingStep) {
+		let response = fetch(url)
 		.then(
 			(result) => {
+				if (loadingStep) {
+					this.setState(prevState => {
+						return {currentLoadingSteps: prevState.currentLoadingSteps + 1}
+					});
+				}
+
 				const json = result.json();
 				return json;
 			}
@@ -304,8 +317,9 @@ export default class GuessPokemonStats extends React.Component {
 				</div>
 			);
 		} else {
+			let percentage = Math.floor((this.state.currentLoadingSteps / this.state.totalLoadingSteps) * 100);
 			selection = (
-				<h1>Loading...</h1>
+				<h1>Loading ({percentage}%)...</h1>
 			);
 		}
 
@@ -330,12 +344,14 @@ export default class GuessPokemonStats extends React.Component {
 								<td className={isMobile ? 'total-mobile' : 'total'}>{Number(this.state.average.toFixed(1))}</td>
 								<td className={isMobile ? 'total-mobile' : 'total'}>{this.state.currentTotal}</td>
 							</tr>
-							<tr className="totals">
-								<td className="total-label">Total</td>
-								<td className="total-label">Average</td>
-								<td className="total-label">Current</td>
-							</tr>
 						</tbody>
+						<thead>
+							<tr className="totals">
+								<th className="total-label">Total</th>
+								<th className="total-label">Average</th>
+								<th className="total-label">Current</th>
+							</tr>
+						</thead>
 					</table>
 				</div>
 				<div>

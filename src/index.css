@@ -38,7 +38,7 @@ tr.totals {
   background: none !important;
 }
 
-td.total-label, td.total, td.total-mobile {
+th.total-label, td.total, td.total-mobile {
   width: 120px;
   padding: 0;
   text-align: center;
@@ -53,8 +53,9 @@ td.total-mobile {
   font-size: 36px;
 }
 
-td.total-label {
+th.total-label {
   font-size: 16px;
+  font-weight: normal;
 }
 
 p.visible, p.invisible, p.correctness {
