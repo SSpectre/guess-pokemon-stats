@@ -204,10 +204,13 @@ export default class GuessPokemonStats extends React.Component {
 	}
 
 	async selectPokemon(index) {
-		this.setState({
-			currentPokemon: await this.state.pokemonList[index],
-			guessed: false,
-		})
+		//delinter says await has no purpose here, but without it, previous Pokemon's stats are shown
+		await this.setState(prevState => {
+			return {
+				currentPokemon: prevState.pokemonList[index],
+				guessed: false,
+			}
+		});
 		
 		let total = 0;
 		for (const stat of this.state.currentPokemon.stats) {
