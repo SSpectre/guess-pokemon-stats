@@ -1,8 +1,9 @@
 import React from 'react';
 import { isMobile } from 'react-device-detect';
-import PokemonSelect from './PokemonSelect'
-import StatSliderContainer from './StatSliderContainer'
-import slugma from './slugma.json'
+import PokemonSelect from './PokemonSelect';
+import StatSliderContainer from './StatSliderContainer';
+import slugma from './slugma.json';
+import pLimit from 'p-limit';
 
 export default class GuessPokemonStats extends React.Component {
 	constructor(props) {
@@ -41,14 +42,25 @@ export default class GuessPokemonStats extends React.Component {
 			});
 			const pokemonUrls = await json.results;
 
-			const pokemonList = await Promise.all(pokemonUrls.map(pokemon => this.fetchJson(pokemon.url, true)));
+			//limit to 1000 simultaneous API requests
+			const limit = pLimit(1000);
+
+			const pokemonList = await Promise.all(
+				pokemonUrls.map(async (pokemon) => {
+					return await limit(() => this.fetchJson(pokemon.url, true));
+				})
+			);
 			this.setState({
 				pokemonList: pokemonList,
 			});
 
 			//api's pokemon object doesn't include national dex number
 			//fetch from pokemon-species and associate it with pokemon
-			const species = await Promise.all(this.state.pokemonList.map(pokemon => this.fetchJson(pokemon.species.url, true)));
+			const species = await Promise.all(
+				this.state.pokemonList.map(async (pokemon) => {
+					return await limit(() => this.fetchJson(pokemon.species.url, true));
+				})
+			);
 			const speciesId = species.map(pokemon => pokemon.id);
 			let tempPokemon = this.state.pokemonList.slice();
 
@@ -248,7 +260,7 @@ export default class GuessPokemonStats extends React.Component {
 	}
 
 	updateCurrentTotal(stats) {
-		let value = stats.reduce((total, stat) => total = total + stat, 0);
+		let value = stats.reduce((total, stat) => total + stat, 0);
 		this.setState({
 			currentStats: stats,
 			currentTotal: value,
@@ -273,7 +285,7 @@ export default class GuessPokemonStats extends React.Component {
 			correctnessValues.push(percentage > 0 ? percentage : 0);
 		}
 
-		let correctness = correctnessValues.reduce((total, value) => total = total + value, 0) / correctnessValues.length;
+		let correctness = correctnessValues.reduce((total, value) => total + value, 0) / correctnessValues.length;
 
 		this.setState({
 			guessed: true,
