@@ -2,7 +2,6 @@ import React from 'react';
 import { isMobile } from 'react-device-detect';
 import PokemonSelect from './PokemonSelect';
 import StatSliderContainer from './StatSliderContainer';
-import slugma from './slugma.json';
 import pLimit from 'p-limit';
 
 export default class GuessPokemonStats extends React.Component {
@@ -92,15 +91,6 @@ export default class GuessPokemonStats extends React.Component {
 
 				const json = result.json();
 				return json;
-			}
-		)
-		.catch(
-			(error) => {
-				//the API page for Slugma specifically returns an empty response only when accessed through the website
-				//I can't determine the cause, so Slugma's data is hardcoded for now
-				if (url.slice(-13) === "/pokemon/218/") {
-					return slugma;
-				}
 			}
 		);
 
