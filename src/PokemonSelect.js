@@ -17,10 +17,10 @@ export default class PokemonSelect extends React.Component {
                 {this.props.pokemonList.map(pokemon => {
                     //alternate forms are differentiated by an indent
                     let indent = '';
-                    if (usedIds.includes(pokemon.species.id)) {
+                    if (usedIds.includes(pokemon.pokemon_species_id)) {
                         indent = '\xA0\xA0\xA0';
                     } else {
-                        usedIds.push(pokemon.species.id);
+                        usedIds.push(pokemon.pokemon_species_id);
                     }
 
                     //capitalize first letter of pokemon's name
@@ -54,7 +54,7 @@ export default class PokemonSelect extends React.Component {
                             key={pokemon.id} 
                             value={pokemon.name}
                         >
-                            {indent}#{pokemon.species.id}: {fixedName}
+                            {indent}#{pokemon.pokemon_species_id}: {fixedName}
                         </option>
                     )
                 })}

@@ -2,7 +2,6 @@ import React from 'react';
 import { isMobile } from 'react-device-detect';
 import PokemonSelect from './PokemonSelect';
 import StatSliderContainer from './StatSliderContainer';
-import pLimit from 'p-limit';
 
 export default class GuessPokemonStats extends React.Component {
 	constructor(props) {
@@ -12,8 +11,6 @@ export default class GuessPokemonStats extends React.Component {
 			//pulls images from Pokemon Database if true and PokeAPI if false
 			//Database is preferred since it uses jpg instead of png, but API has more complete and up-to-date art, so it will more likely be used
 			useDBForImages: false,
-			totalLoadingSteps: 1,
-			currentLoadingSteps: 0,
 			pokemonList: [],
 			currentPokemon: null,
 			realTotal: 0,
@@ -25,6 +22,8 @@ export default class GuessPokemonStats extends React.Component {
 			correctness: 0
 		};
 
+		this.fetchJson = this.fetchJson.bind(this);
+		this.getImageUrl = this.getImageUrl.bind(this);
 		this.selectPokemonFromDropdown = this.selectPokemonFromDropdown.bind(this);
 		this.selectRandomPokemon = this.selectRandomPokemon.bind(this);
 		this.updateStat = this.updateStat.bind(this);
@@ -33,44 +32,48 @@ export default class GuessPokemonStats extends React.Component {
 
 	componentDidMount() {
 		(async () => {
-			//fetch urls to pokemon objects from apis
-			const json = await this.fetchJson('https://pokeapi.co/api/v2/pokemon?limit=2000', false);
-			this.setState({
-				//there are two steps involved for each pokemon which will contribute to the loading percentage
-				totalLoadingSteps: json.count * 2
-			});
-			const pokemonUrls = await json.results;
+			const query = `query getPokemon {
+				pokemon(
+					  order_by: {id: asc}
+				) {
+					name
+					id
+					pokemon_species_id
+					stats: pokemonstats {
+						base_stat
+						stat {
+						name
+						}
+					}
+					pokemonsprites {
+						sprites
+					}
+				}
+			}`;
+	
+			const json = await this.fetchJson("https://graphql.pokeapi.co/v1beta2", query)
+			let pokemonList = json.data.pokemon;
 
-			//limit to 1000 simultaneous API requests
-			const limit = pLimit(1000);
-
-			const pokemonList = await Promise.all(
-				pokemonUrls.map(async (pokemon) => {
-					return await limit(() => this.fetchJson(pokemon.url, true));
-				})
-			);
 			this.setState({
 				pokemonList: pokemonList,
 			});
 
-			//api's pokemon object doesn't include national dex number
-			//fetch from pokemon-species and associate it with pokemon
-			const species = await Promise.all(
-				this.state.pokemonList.map(async (pokemon) => {
-					return await limit(() => this.fetchJson(pokemon.species.url, true));
-				})
-			);
-			const speciesId = species.map(pokemon => pokemon.id);
-			let tempPokemon = this.state.pokemonList.slice();
-
-			for (let i = 0; i < speciesId.length; i++) {
-				tempPokemon[i].species.id = speciesId[i];
+			//PokeAPI GraphQL stores its sprites heavily nested, so we move them up the hierarchy
+			for (const pokemon of pokemonList) {
+				pokemon.sprites = pokemon.pokemonsprites[0].sprites;
+				const {pokemonsprites, ...newPokemon} = pokemon;
 			}
 
-			let filteredPokemon = this.filterAndFormat(tempPokemon);
+			let filteredPokemon = this.filterAndFormat(pokemonList);
+
+			for (const pokemon of filteredPokemon) {
+				//associate an image URL with each Pokemon
+				let imageUrl = this.getImageUrl(pokemon);
+				pokemon.image_url = imageUrl
+			}
 
 			//place alternate forms after base forms
-			filteredPokemon.sort((a, b) => a.species.id - b.species.id);
+			filteredPokemon.sort((a, b) => a.pokemon_species_id - b.pokemon_species_id);
 
 			this.setState({
 				pokemonList: filteredPokemon,
@@ -79,25 +82,28 @@ export default class GuessPokemonStats extends React.Component {
 		})();
 	}
 
-	fetchJson(url, loadingStep) {
-		let response = fetch(url)
+	fetchJson(url, query) {
+		let response = fetch(url, {
+			method: 'POST',
+			header: {'Content-Type': 'application/json'},
+			body: JSON.stringify({query})
+		})
 		.then(
-			(result) => {
-				if (loadingStep) {
-					this.setState(prevState => {
-						return {currentLoadingSteps: prevState.currentLoadingSteps + 1}
-					});
+			async (result) => {
+				try {
+					const response = result.json();
+					return response;
+				} catch (e) {
+					console.error(e);
+					return {};
 				}
-
-				const json = result.json();
-				return json;
 			}
 		);
 
 		return response;
 	}
 
-	filterAndFormat(originalList, useDB) {
+	filterAndFormat(originalList) {
 		let filteredPokemon;
 
 		if (this.state.useDBForImages) {
@@ -116,7 +122,7 @@ export default class GuessPokemonStats extends React.Component {
 				result = result && !tempName.match(/-power-construct$/g);
 				result = result && !tempName.match(/-own-tempo$/g);
 				result = result && !tempName.match(/-busted$/g);
-				result = result && !tempName.match(/-original$/g);
+				result = result && !tempName.match(/magearna-original/g);
 				result = result && !tempName.match(/cramorant-/g);
 				result = result && !tempName.match(/-low-key-gmax$/g);
 				result = result && !tempName.match(/-eternamax$/g);
@@ -158,6 +164,7 @@ export default class GuessPokemonStats extends React.Component {
 			//filter out forms that have no artwork or only minor differences
 			filteredPokemon = originalList.filter((value, index, arr) => {
 				let tempName = value.name;
+				let imageBase = value.sprites.other;
 				let result = true;
 
 				result = !tempName.match(/-totem/g);
@@ -168,12 +175,14 @@ export default class GuessPokemonStats extends React.Component {
 				result = result && !tempName.match(/-power-construct$/g);
 				result = result && !tempName.match(/-own-tempo$/g);
 				result = result && !tempName.match(/-busted$/g);
-				result = result && !tempName.match(/-original$/g);
+				result = result && !tempName.match(/magearna-original/g);
 				result = result && !tempName.match(/cramorant-/g);
 				result = result && !tempName.match(/-low-key-gmax$/g);
 				result = result && !tempName.match(/-dada$/g);
 				result = result && !tempName.match(/koraidon-/g);
 				result = result && !tempName.match(/miraidon-/g);
+
+				result = result && imageBase['official-artwork']['front_default'];
 
 				return result;
 			})
@@ -194,6 +203,20 @@ export default class GuessPokemonStats extends React.Component {
 		}
 
 		return filteredPokemon;
+	}
+
+	getImageUrl(pokemon) {
+		let imageUrl;
+	
+		//PokemonDB uses jpg instead of png, but PokeAPI has more complete and up-to-date art
+		if (this.state.useDBForImages) {
+			imageUrl = 'https://img.pokemondb.net/artwork/' + pokemon.name + '.jpg'
+		} else {
+			let imageBase = pokemon.sprites.other
+			imageUrl = imageBase['official-artwork']['front_default'];
+		}
+	
+		return imageUrl;
 	}
 
 	selectPokemonFromDropdown(event) {
@@ -289,20 +312,12 @@ export default class GuessPokemonStats extends React.Component {
 
 		let selection;
 		if (loaded) {
-			let imageUrl;
-			if (this.state.useDBForImages) {
-				imageUrl = 'https://img.pokemondb.net/artwork/' + this.state.currentPokemon.name + '.jpg'
-			} else {
-				let imageBase = this.state.currentPokemon.sprites.other
-				imageUrl = imageBase['official-artwork']['front_default'];
-			}
-
 		 	selection = (
 				<div>
 					<div>
 						<img
 							className={isMobile ? 'pokemon-img-mobile' : 'pokemon-img'}
-							src={imageUrl}
+							src={this.state.currentPokemon.image_url}
 							alt={this.state.currentPokemon.name}
 						/>
 					</div>
@@ -322,9 +337,8 @@ export default class GuessPokemonStats extends React.Component {
 				</div>
 			);
 		} else {
-			let percentage = Math.floor((this.state.currentLoadingSteps / this.state.totalLoadingSteps) * 100);
 			selection = (
-				<h1>Loading ({percentage}%)...</h1>
+				<h1>Loading...</h1>
 			);
 		}
 
